@@ -146,6 +146,9 @@ label.inline { text-transform: none; letter-spacing: 0; font-size: .8rem; }
 .tempos div { background: var(--bg); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; }
 .tempos b { font: 700 1.3rem var(--display); }
 .tempos span { font-size: .85rem; color: var(--muted); }
+.where { align-self: flex-start; font: 600 .7rem var(--body); text-transform: uppercase; letter-spacing: .07em; padding: 1px 8px; border-radius: 999px;
+  background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.where.w-pad { color: var(--i); border-color: var(--i); }
 </style>
 </head>
 <body>
@@ -232,7 +235,7 @@ const LESSONS = {
       ] },
   ],
   drums: [
-    { id: "d1", title: "Strokes", goal: "Even single and double strokes with a relaxed rebound. Practise on a pad.",
+    { id: "d1", where: "both", title: "Strokes", goal: "Even single and double strokes with a relaxed rebound. Practise on a pad.",
       drills: [
         { id: "d-s8", name: "Single strokes, 8ths", pattern: "R L R L R L R L", unit: "8th notes", ladder: [60, 80, 100, 120, 140],
           how: "Let the stick bounce back to where it started. Both hands should sound exactly the same.", q: "single stroke roll drum lesson beginner" },
@@ -243,7 +246,7 @@ const LESSONS = {
         { id: "d-acc", name: "Accents and taps", pattern: ">R L R L  >L R L R", unit: "8th notes", ladder: [60, 80, 100, 120],
           how: "Accent from about 30 cm, taps from 5 cm. Stop the stick low right after an accent.", q: "drum accent tap exercise beginner" },
       ] },
-    { id: "d2", title: "Essential rudiments", goal: "The four rudiments that show up in most beats and fills.",
+    { id: "d2", where: "both", title: "Essential rudiments", goal: "The four rudiments that show up in most beats and fills.",
       drills: [
         { id: "d-para", name: "Single paradiddle", pattern: ">R L R R  >L R L L", unit: "16th notes", ladder: [50, 60, 70, 80, 90, 100, 110],
           how: "Accent the first note of each group. Later put the accents on the snare and the rest on the hi-hat for a groove.", q: "single paradiddle drum lesson" },
@@ -254,7 +257,45 @@ const LESSONS = {
         { id: "d-five", name: "Five-stroke roll", pattern: "RRLL >R  LLRR >L", unit: "16th notes", ladder: [50, 60, 70, 80, 90],
           how: "Two doubles and an accented single. A common way to end a fill.", q: "five stroke roll rudiment lesson" },
       ] },
-    { id: "d3", title: "First beats", goal: "The basic rock beat and its main variations, steady with a metronome.",
+    { id: "p1", where: "pad", title: "Daily pad routine (15 minutes)", goal: "A warm-up you can do every day at home: about 3 minutes per drill, in this order, with the metronome.",
+      drills: [
+        { id: "p-8hand", name: "8 on a hand", pattern: "R×8 L×8 · R×4 L×4 · R×2 L×2 · R L R L", unit: "8th notes", ladder: [60, 80, 100, 120, 140],
+          how: "Wrist only, and the stick goes back to the same height every time. The classic drummer's warm-up.", q: "8 on a hand drum pad warm up" },
+        { id: "p-subdiv", name: "Subdivision ladder", pattern: "4 beats each:\nquarters → 8ths → triplets → 16ths → triplets → 8ths → quarters", unit: "changing notes per beat", ladder: [60, 70, 80, 90, 100],
+          how: "The click stays the same; only the number of notes per beat changes. Count out loud: 1 · 1 & · 1 & a · 1 e & a. Builds rock-solid time.", q: "subdivision exercise practice pad quarter eighth triplet sixteenth" },
+        { id: "p-accgrid", name: "Accent grid", pattern: ">R L R L · R >L R L · R L >R L · R L R >L", unit: "16th notes", ladder: [60, 70, 80, 90, 100],
+          how: "Move the accent one note to the right each bar. Accents from high, taps from low, nothing in between.", q: "accent grid exercise drum pad" },
+        { id: "p-stick", name: "Stick control mix", pattern: "RLRL RLRL · RRLL RRLL · RLRR LRLL · RLLR LRRL", unit: "8th notes", ladder: [60, 70, 80, 90, 100, 110],
+          how: "Two bars of each sticking without stopping. Patterns in the style of the classic book 'Stick Control'.", q: "stick control exercises practice pad beginner" },
+      ] },
+    { id: "p2", where: "pad", title: "Feet without a kit", goal: "Train the kick and hi-hat foot on the floor, so your feet are ready when you sit at the kit.",
+      drills: [
+        { id: "p-foot", name: "Kick foot on quarter notes", pattern: "right foot taps 1 2 3 4, heel up", unit: "quarter notes", ladder: [60, 80, 100, 120],
+          how: "Sit as you would at the kit and tap the floor with the ball of the foot. Every tap the same volume.", q: "drum foot technique exercise without pedal heel up" },
+        { id: "p-feet", name: "Kick and hi-hat foot", pattern: "RF  o . o .  (beats 1 and 3)\nLF  . o . o  (beats 2 and 4)", unit: "quarter notes", ladder: [60, 70, 80, 90, 100],
+          how: "Left foot taps on 2 and 4, like closing a hi-hat pedal. Builds the coordination you need for four limbs.", q: "hi hat foot exercise beginner drums" },
+        { id: "p-handsfeet", name: "Hands over steady feet", pattern: "hands RLRL 8ths on the pad\nRF on 1 and 3 · LF on 2 and 4", unit: "8th notes", ladder: [60, 70, 80, 90, 100],
+          how: "Feet keep going while the hands play singles, then doubles, then paradiddles.", q: "drum independence exercise hands and feet beginner" },
+      ] },
+    { id: "p3", where: "pad", title: "Beats on the pad", goal: "Play real grooves with a pad, your knee and your feet. Same coordination as the kit, at low volume.",
+      drills: [
+        { id: "p-rock", name: "Rock beat on the pad", pattern: "RH  x x x x x x x x  pad = hi-hat\nLH  . . o . . . o .  knee or rim = snare\nRF  o . . . o . . .  floor tap = kick", unit: "8th notes", ladder: [60, 70, 80, 90, 100, 110],
+          how: "Right hand on the pad, left hand on your knee or the pad's rim, right foot taps the floor. Exactly the beat from 'First beats', just quieter.", q: "how to practice drum beats on a practice pad" },
+        { id: "p-rock16", name: "16th hi-hat on the pad", pattern: "RH 16ths on the pad\nLH on 2 and 4 · RF on 1 and 3", unit: "16th notes", ladder: [50, 60, 70, 80, 90],
+          how: "Keep the right hand light and even; the left hand backbeat stays strong.", q: "16th note groove practice pad" },
+        { id: "p-ghost", name: "Ghost notes", pattern: "RH  8ths\nLH  loud on 2 and 4, very soft taps on the 'a's", unit: "16th notes", ladder: [60, 70, 80, 90],
+          how: "Soft left-hand notes from 2 cm between the loud backbeats. A pad is perfect for this because you hear every note. The secret of funky grooves.", q: "ghost notes drum lesson practice pad" },
+      ] },
+    { id: "p4", where: "pad", title: "Fills on the pad", goal: "Practise fills and getting back to the beat on time. On the kit you only move them around the drums.",
+      drills: [
+        { id: "p-fill", name: "Fill and back", pattern: "3 bars: 8ths R L R L\nbar 4: 16ths RLRL RLRL RLRL RLRL\nthen >1", unit: "16th notes", ladder: [60, 70, 80, 90, 100],
+          how: "Count the bars out loud. The accent after the fill must land exactly on beat 1.", q: "practice pad drum fill exercise beginner" },
+        { id: "p-trip", name: "Triplet fill", pattern: ">R L L >R L L >R L L >R L L", unit: "triplets", ladder: [50, 60, 70, 80, 90],
+          how: "Accent every R, keep the L L soft. On the kit the accents go on the toms.", q: "RLL triplet fill drums lesson" },
+        { id: "p-parafill", name: "Paradiddle fill", pattern: ">R L R R >L R L L >R L R R >L R L L", unit: "16th notes", ladder: [60, 70, 80, 90, 100],
+          how: "Accents loud, as if on the toms; everything else soft, as ghost notes.", q: "paradiddle drum fill lesson" },
+      ] },
+    { id: "d3", where: "kit", title: "First beats", goal: "The basic rock beat and its main variations, steady with a metronome.",
       drills: [
         { id: "d-rock", name: "Basic rock beat", pattern: "HH  x x x x x x x x\nSN  . . o . . . o .\nBD  o . . . o . . .", unit: "8th notes", ladder: [60, 70, 80, 90, 100, 110, 120],
           how: "Learn it in layers: hi-hat alone, then add the snare on 2 and 4, then the kick on 1 and 3. Count out loud.", q: "basic rock beat first drum lesson" },
@@ -267,7 +308,7 @@ const LESSONS = {
         { id: "d-four", name: "Four on the floor", pattern: "HH  closed on beats, open on &\nSN  on 2 and 4\nBD  every beat", unit: "8th notes", ladder: [90, 100, 110, 120, 128],
           how: "The dance and disco beat. Keep every kick the same volume.", q: "four on the floor disco beat drum lesson" },
       ] },
-    { id: "d4", title: "Fills and feel", goal: "Go in and out of short fills without losing time, and learn the shuffle.",
+    { id: "d4", where: "kit", title: "Fills and feel", goal: "Go in and out of short fills without losing time, and learn the shuffle.",
       drills: [
         { id: "d-fill1", name: "One-beat fill", pattern: "3 bars of beat, then bar 4:\nbeat · beat · beat · S S T T", unit: "16th notes", ladder: [60, 70, 80, 90, 100],
           how: "Fill only the last beat, then crash and kick on 1. Coming back on time matters more than the fill.", q: "easy one beat drum fill beginner" },
@@ -311,6 +352,15 @@ const TIPS = [
     "<b>Count out loud:</b> '1 e & a 2 e & a'. If you can't count it, you can't play it in time.",
     "<b>Use a practice pad</b> for rudiments: 10 minutes a day with the metronome, quietly at home. It's where most speed and control comes from.",
     "<b>Lead with either hand.</b> Practise every rudiment starting with the left hand too. It makes fills much easier later.",
+  ] },
+  { inst: "drums", title: "Drums: practising at home on a pad", items: [
+    "<b>Copy your kit position.</b> Put the pad on a stand or table at the height of a snare, sit on a chair as high as your drum throne, and hold the sticks exactly as at your lessons.",
+    "<b>Pads bounce more than drums.</b> Rubber gives a lot of rebound and hides uneven strokes. Listen for every note sounding the same, and check stick heights in a mirror.",
+    "<b>Pillow drill for strength.</b> Play singles on a pillow for 1 minute per hand. There is no rebound, so your wrists do all the work. Afterwards the pad feels easy.",
+    "<b>Turn yourself into a kit.</b> Pad = hi-hat or snare, knee or pad rim = snare, right foot on the floor = kick, left foot = hi-hat pedal. The Beats on the pad lesson shows how.",
+    "<b>Bring your teacher's homework home.</b> Write each exercise and its tempo in the Log note, and practise it on the pad with the metronome until the next lesson.",
+    "<b>Play along to songs on headphones.</b> Tap the beat on the pad and your feet on the floor. It trains time and feel without disturbing anyone.",
+    "<b>Little and often.</b> 10–15 minutes on the pad every day keeps your hands ready, so lesson time goes on new material, not catching up.",
   ] },
   { inst: "drums", title: "Drums: beats and the kit", items: [
     "<b>Build beats in layers.</b> Hi-hat alone, then add the snare, then the kick. Only add a layer when the last one is steady.",
@@ -357,7 +407,18 @@ const CURRICULUM = {
 };
 
 let meta = null, logs = [], store = null, tab = "progress", pendingDelete = null, restoreArmed = false, restoreDraft = "", toastT;
-let lessonInst = "guitar", openLesson = "auto";
+let lessonInst = "guitar", openLesson = "auto", drumWhere = "all";
+const WHERE = { all: "All lessons", pad: "Practice pad", kit: "Drum kit" };
+const WHERE_TAG = { pad: "Practice pad", kit: "Drum kit", both: "Pad or kit" };
+// Deep links: #guitar, #drums and #pad open the Lessons tab (Life OS habits link here).
+function applyHash() {
+  const h = (location.hash || "").slice(1);
+  if (h === "guitar" || h === "drums" || h === "pad") {
+    tab = "lessons"; lessonInst = h === "guitar" ? "guitar" : "drums"; drumWhere = h === "pad" ? "pad" : "all"; openLesson = "auto";
+  }
+}
+applyHash();
+window.addEventListener("hashchange", () => { applyHash(); render(); });
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const pad = n => String(n).padStart(2, "0");
@@ -647,7 +708,7 @@ function lessonCard(l, n) {
   const p = lessonPct(l), open = openLesson === l.id;
   return `<section class="card lesson i-${lessonInst}">
     <button class="lhead" type="button" data-act="lopen" data-id="${l.id}" aria-expanded="${open}">
-      <span class="lnum">${pad(n)}</span><span class="ltitle"><strong>${esc(l.title)}</strong><span class="small muted">${esc(l.goal)}</span></span><span class="lpct">${p}%</span></button>
+      <span class="lnum">${pad(n)}</span><span class="ltitle">${l.where ? `<span class="where w-${l.where}">${WHERE_TAG[l.where]}</span>` : ""}<strong>${esc(l.title)}</strong><span class="small muted">${esc(l.goal)}</span></span><span class="lpct">${p}%</span></button>
     <div class="bar"><i style="width:${p}%"></i></div>
     ${open ? lessonBody(l) : ""}
   </section>`;
@@ -660,11 +721,15 @@ function metroBar() {
       <button class="btn primary" type="button" id="metro-toggle" data-act="mtoggle">${metro.on ? "Stop" : "Start"}</button></div></div>`;
 }
 function lessonsView() {
-  const ls = LESSONS[lessonInst];
-  if (openLesson === "auto") openLesson = (ls.find(l => lessonPct(l) < 100) || ls[0]).id;
+  const drums = lessonInst === "drums";
+  const fits = l => !drums || drumWhere === "all" || l.where === drumWhere || l.where === "both";
+  const ls = LESSONS[lessonInst].map((l, n) => [l, n + 1]).filter(([l]) => fits(l));
+  if (openLesson === "auto") openLesson = ((ls.find(([l]) => lessonPct(l) < 100) || ls[0]) || [{}])[0].id;
   return metroBar() +
     `<div class="row" role="group" aria-label="Instrument">${INSTS.map(i => `<button type="button" class="btn ${i === lessonInst ? "primary" : ""}" data-act="linst" data-i="${i}" aria-pressed="${i === lessonInst}">${NAME[i]}</button>`).join("")}</div>` +
-    ls.map((l, n) => lessonCard(l, n + 1)).join("");
+    (drums ? `<div class="row" role="group" aria-label="Where you practise"><span class="mini">Show:</span>${Object.entries(WHERE).map(([k, t]) => `<button type="button" class="chip i-drums ${k === drumWhere ? "on" : ""}" data-act="lwhere" data-w="${k}" aria-pressed="${k === drumWhere}">${t}</button>`).join("")}</div>
+      ${drumWhere === "pad" ? `<p class="small muted">Everything here works at home with a practice pad, your knees and your feet on the floor. Strokes and rudiments are the same on a pad and a drum.</p>` : ""}` : "") +
+    ls.map(([l, n]) => lessonCard(l, n)).join("");
 }
 
 // ---------- tips view ----------
@@ -724,6 +789,7 @@ document.addEventListener("click", async e => {
     render(); window.scrollTo({ top: 0 }); return;
   }
   if (act === "linst") { lessonInst = el.dataset.i; openLesson = "auto"; render(); return; }
+  if (act === "lwhere") { drumWhere = el.dataset.w; openLesson = "auto"; render(); return; }
   if (act === "lopen") { openLesson = openLesson === el.dataset.id ? null : el.dataset.id; render(); return; }
   if (act === "ladder") {
     const d = allDrills().find(x => x.id === el.dataset.id), bpm = +el.dataset.bpm; if (!d) return;
