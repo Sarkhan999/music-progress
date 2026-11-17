@@ -115,6 +115,37 @@ label.full { grid-column: 1 / -1; }
 .dots i.on { background: var(--i); }
 .mini { font-size: .85rem; color: var(--muted); }
 .backup textarea { font-family: ui-monospace, Consolas, monospace; font-size: .85rem; }
+#view { display: flex; flex-direction: column; gap: 14px; }
+.metro { position: sticky; top: 0; z-index: 5; padding-top: calc(12px + env(safe-area-inset-top, 0px)); }
+.metro .bpm { width: 5.5em; font: 600 1.2rem var(--display); text-align: center; }
+.lesson { gap: 12px; }
+.lhead { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: start; background: none; border: 0; padding: 0;
+  text-align: left; color: var(--ink); font: inherit; cursor: pointer; }
+.lnum { font: 700 1.7rem var(--display); color: var(--i); line-height: 1; font-variant-numeric: tabular-nums; }
+.ltitle { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ltitle strong { font: 700 1.35rem var(--display); }
+.lpct { font: 600 1.2rem var(--display); color: var(--muted); }
+.chords { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 10px; }
+.chord { display: flex; flex-direction: column; align-items: center; gap: 6px; background: var(--bg); border-radius: 10px; padding: 10px 8px; min-width: 0; }
+.chord svg { width: 90px; height: 100px; color: var(--ink); }
+.chord strong { font: 700 1.4rem var(--display); }
+.chord select { font-size: .82rem; padding: 4px 6px; }
+.chg { display: grid; grid-template-columns: 6.5em 9.5em minmax(0, 1fr) auto; gap: 10px; align-items: center; background: var(--bg); border-radius: 10px; padding: 8px 12px; }
+.chg input { padding: 4px 8px; }
+@media (max-width: 560px) { .chg { grid-template-columns: 1fr 1fr; } .chg .bar { grid-column: 1 / -1; } }
+label.inline { text-transform: none; letter-spacing: 0; font-size: .8rem; }
+.drill { background: var(--bg); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.pat { font-family: ui-monospace, Consolas, monospace; font-size: .9rem; background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+  padding: 6px 10px; align-self: flex-start; white-space: pre; overflow-x: auto; max-width: 100%; line-height: 1.45; }
+.chip { font: 600 .85rem var(--body); padding: 3px 10px; border-radius: 999px; border: 2px solid var(--i); background: transparent; color: var(--ink);
+  cursor: pointer; font-variant-numeric: tabular-nums; }
+.chip.on { background: var(--i); color: var(--surface); }
+.tips ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; }
+.tips li b { color: var(--i, var(--ink)); }
+.tempos { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+.tempos div { background: var(--bg); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; }
+.tempos b { font: 700 1.3rem var(--display); }
+.tempos span { font-size: .85rem; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -136,7 +167,160 @@ const INSTS = ["guitar", "drums"];
 const NAME = { guitar: "Guitar", drums: "Drums" };
 const STAGES = ["Not started", "Learning", "Slow and clean", "Steady", "Target tempo", "Mastered"];
 const DUE_DAYS = [0, 1, 3, 7, 14, 30]; // days before a skill at this stage is due for review
-const TABS = [["progress", "Progress"], ["log", "Log"], ["skills", "Skills"], ["backup", "Backup"]];
+const TABS = [["progress", "Progress"], ["lessons", "Lessons"], ["log", "Log"], ["skills", "Skills"], ["tips", "Tips & tricks"], ["backup", "Backup"]];
+const CHORD_STAGES = ["Not started", "Can form the shape", "Every string rings", "Switch in 4 beats", "Switch in 2 beats", "Switch on every beat"];
+const YT = q => "https://www.youtube.com/results?search_query=" + encodeURIComponent(q);
+// Chord shapes, strings low E to high e. f: fret (-1 = don't play, 0 = open), fi: finger (1 index … 4 pinky), barre: fret held by the index.
+const CHORDS = {
+  G: { f: [3, 2, 0, 0, 0, 3], fi: [2, 1, 0, 0, 0, 3] },
+  C: { f: [-1, 3, 2, 0, 1, 0], fi: [0, 3, 2, 0, 1, 0] },
+  D: { f: [-1, -1, 0, 2, 3, 2], fi: [0, 0, 0, 1, 3, 2] },
+  Em: { f: [0, 2, 2, 0, 0, 0], fi: [0, 2, 3, 0, 0, 0] },
+  Am: { f: [-1, 0, 2, 2, 1, 0], fi: [0, 0, 2, 3, 1, 0] },
+  E: { f: [0, 2, 2, 1, 0, 0], fi: [0, 2, 3, 1, 0, 0] },
+  A: { f: [-1, 0, 2, 2, 2, 0], fi: [0, 0, 1, 2, 3, 0] },
+  Dm: { f: [-1, -1, 0, 2, 3, 1], fi: [0, 0, 0, 2, 3, 1] },
+  E7: { f: [0, 2, 0, 1, 0, 0], fi: [0, 2, 0, 1, 0, 0] },
+  A7: { f: [-1, 0, 2, 0, 2, 0], fi: [0, 0, 2, 0, 3, 0] },
+  D7: { f: [-1, -1, 0, 2, 1, 2], fi: [0, 0, 0, 2, 1, 3] },
+  Cadd9: { f: [-1, 3, 2, 0, 3, 3], fi: [0, 2, 1, 0, 3, 4] },
+  F: { f: [1, 3, 3, 2, 1, 1], fi: [1, 3, 4, 2, 1, 1], barre: 1 },
+  Bm: { f: [-1, 2, 4, 4, 3, 2], fi: [0, 1, 3, 4, 2, 1], barre: 2 },
+  B7: { f: [-1, 2, 1, 2, 0, 2], fi: [0, 2, 1, 3, 0, 4] },
+  E5: { f: [0, 2, 2, -1, -1, -1], fi: [0, 1, 3, 0, 0, 0] },
+  A5: { f: [-1, 0, 2, 2, -1, -1], fi: [0, 0, 1, 3, 0, 0] },
+  G5: { f: [3, 5, 5, -1, -1, -1], fi: [1, 3, 4, 0, 0, 0] },
+};
+// Lessons: chords to rate, chord pairs for one-minute changes, and drills with a tempo ladder (BPM steps to play cleanly).
+const LESSONS = {
+  guitar: [
+    { id: "g1", title: "Your first chords", goal: "Play G, C, D, Em and Am cleanly and switch between them. These five cover thousands of songs.",
+      chords: ["G", "C", "D", "Em", "Am"], changes: [["G", "C"], ["C", "D"], ["G", "D"], ["Em", "Am"], ["Am", "C"], ["G", "Em"]],
+      drills: [
+        { id: "g-down4", name: "Down strums on every beat", pattern: "D   D   D   D", unit: "quarter notes", ladder: [60, 70, 80, 90, 100],
+          how: "One down strum per click. Play G for 4 strums, then C for 4, without stopping. Move the whole chord shape at once.", q: "beginner guitar down strumming chord changes" },
+      ] },
+    { id: "g2", title: "Strumming patterns", goal: "Keep a steady down-up motion and learn the pattern used in most pop songs.",
+      drills: [
+        { id: "g-strum8", name: "Down-up 8ths", pattern: "D U D U D U D U\n1 & 2 & 3 & 4 &", unit: "8th notes", ladder: [60, 70, 80, 90, 100, 110],
+          how: "Down on the numbers, up on the '&'. The hand never stops, even when it misses the strings.", q: "guitar down up strumming 8th notes beginner" },
+        { id: "g-pop", name: "The pop pattern", pattern: "D   D U   U D U\n1   2 &   & 4 &", unit: "8th notes", ladder: [60, 70, 80, 90, 100],
+          how: "Beat 3 is a silent down strum: the hand moves but misses. Play it on G-D-Em-C, the most common chord loop in pop.", q: "D DU UDU strumming pattern lesson" },
+        { id: "g-chuck", name: "Strum with a chop on 2 and 4", pattern: "D X U D X U\nX = hand flat on the strings", unit: "8th notes", ladder: [60, 70, 80, 90],
+          how: "Slap the strumming hand flat on the strings on beats 2 and 4. It sounds like a snare drum and keeps the rhythm tight.", q: "guitar percussive strum chuck mute lesson" },
+      ] },
+    { id: "g3", title: "More open chords", goal: "Add E, A, Dm and the 7th chords that turn up in blues and folk songs.",
+      chords: ["E", "A", "Dm", "E7", "A7", "D7", "Cadd9"], changes: [["E", "A"], ["A", "D"], ["D", "Dm"], ["A7", "D7"], ["E7", "A7"], ["G", "Cadd9"]],
+      drills: [
+        { id: "g-blues", name: "12-bar blues in A", pattern: "A7 A7 A7 A7 | D7 D7 A7 A7 | E7 D7 A7 E7", unit: "8th notes", ladder: [60, 70, 80, 90, 100],
+          how: "One bar per chord with down-up strums. Swing it slightly. The base of thousands of blues and rock songs.", q: "12 bar blues A beginner guitar" },
+      ] },
+    { id: "g4", title: "Barre and power chords", goal: "Play F and Bm without buzzing, and move power chords around the neck.",
+      chords: ["F", "Bm", "B7", "E5", "A5", "G5"], changes: [["C", "F"], ["G", "Bm"], ["E5", "G5"], ["Am", "F"]],
+      drills: [
+        { id: "g-power", name: "Power chord shifts", pattern: "E5 ×8 · G5 ×8 · A5 ×8 · C5 ×8", unit: "8th notes", ladder: [70, 80, 90, 100, 110, 120],
+          how: "Keep the hand shape fixed and slide. Palm-mute near the bridge for a tight rock sound.", q: "power chords beginner lesson palm mute" },
+      ] },
+    { id: "g5", title: "Picking, fingerpicking and scales", goal: "Clean alternate picking, a first fingerpicking pattern and the first scale shape for solos.",
+      drills: [
+        { id: "g-chrom", name: "Chromatic 1-2-3-4", pattern: "frets 1 2 3 4 on each string\npick D U D U", unit: "8th notes", ladder: [60, 70, 80, 90, 100, 110, 120],
+          how: "One finger per fret, strict down-up picking. Keep fingers close to the strings. Best warm-up there is.", q: "guitar chromatic exercise 1234 alternate picking" },
+        { id: "g-pick", name: "Fingerpicking p-i-m-a", pattern: "p i m a m i\n(thumb, index, middle, ring)", unit: "8th notes", ladder: [50, 60, 70, 80, 90],
+          how: "Thumb plays the bass note, fingers play the G, B and e strings. Hold C, then Am, then G.", q: "easy fingerpicking pattern beginner guitar" },
+        { id: "g-penta", name: "A minor pentatonic, box 1", pattern: "e 5-8 · B 5-8 · G 5-7\nD 5-7 · A 5-7 · E 5-8", unit: "8th notes", ladder: [60, 70, 80, 90, 100],
+          how: "Up and down the shape with alternate picking, then improvise over an A minor backing track.", q: "A minor pentatonic box 1 beginner lesson" },
+      ] },
+  ],
+  drums: [
+    { id: "d1", title: "Strokes", goal: "Even single and double strokes with a relaxed rebound. Practise on a pad.",
+      drills: [
+        { id: "d-s8", name: "Single strokes, 8ths", pattern: "R L R L R L R L", unit: "8th notes", ladder: [60, 80, 100, 120, 140],
+          how: "Let the stick bounce back to where it started. Both hands should sound exactly the same.", q: "single stroke roll drum lesson beginner" },
+        { id: "d-s16", name: "Single strokes, 16ths", pattern: "RLRL RLRL RLRL RLRL", unit: "16th notes", ladder: [60, 70, 80, 90, 100, 110, 120],
+          how: "Same motion, twice the notes. Tension slows you down: loosen the back fingers.", q: "single stroke roll 16th notes practice" },
+        { id: "d-dbl", name: "Double strokes", pattern: "RR LL RR LL", unit: "16th notes", ladder: [50, 60, 70, 80, 90, 100],
+          how: "A wrist stroke, then a finger-controlled bounce. The second note must be as loud as the first.", q: "double stroke roll drum lesson beginner" },
+        { id: "d-acc", name: "Accents and taps", pattern: ">R L R L  >L R L R", unit: "8th notes", ladder: [60, 80, 100, 120],
+          how: "Accent from about 30 cm, taps from 5 cm. Stop the stick low right after an accent.", q: "drum accent tap exercise beginner" },
+      ] },
+    { id: "d2", title: "Essential rudiments", goal: "The four rudiments that show up in most beats and fills.",
+      drills: [
+        { id: "d-para", name: "Single paradiddle", pattern: ">R L R R  >L R L L", unit: "16th notes", ladder: [50, 60, 70, 80, 90, 100, 110],
+          how: "Accent the first note of each group. Later put the accents on the snare and the rest on the hi-hat for a groove.", q: "single paradiddle drum lesson" },
+        { id: "d-flam", name: "Flam", pattern: "lR  rL  (small letter = grace note)", unit: "quarter notes", ladder: [50, 60, 70, 80, 90],
+          how: "The low stick lands just before the high stick. It should sound like one fat note, not two.", q: "flam rudiment drum lesson" },
+        { id: "d-drag", name: "Drag", pattern: "llR  rrL", unit: "quarter notes", ladder: [50, 60, 70, 80],
+          how: "Two soft bounced grace notes right before the main stroke.", q: "drag rudiment drum lesson" },
+        { id: "d-five", name: "Five-stroke roll", pattern: "RRLL >R  LLRR >L", unit: "16th notes", ladder: [50, 60, 70, 80, 90],
+          how: "Two doubles and an accented single. A common way to end a fill.", q: "five stroke roll rudiment lesson" },
+      ] },
+    { id: "d3", title: "First beats", goal: "The basic rock beat and its main variations, steady with a metronome.",
+      drills: [
+        { id: "d-rock", name: "Basic rock beat", pattern: "HH  x x x x x x x x\nSN  . . o . . . o .\nBD  o . . . o . . .", unit: "8th notes", ladder: [60, 70, 80, 90, 100, 110, 120],
+          how: "Learn it in layers: hi-hat alone, then add the snare on 2 and 4, then the kick on 1 and 3. Count out loud.", q: "basic rock beat first drum lesson" },
+        { id: "d-rock2", name: "Rock beat, kick on 3 &", pattern: "HH  x x x x x x x x\nSN  . . o . . . o .\nBD  o . . . o o . .", unit: "8th notes", ladder: [60, 70, 80, 90, 100, 110],
+          how: "The extra kick on '3 &' is the most used variation in pop and rock.", q: "rock beat kick variations drum lesson" },
+        { id: "d-16hh", name: "16th-note hi-hat groove", pattern: "HH  16ths, one hand\nSN  on 2 and 4\nBD  on 1 and 3", unit: "16th notes", ladder: [50, 60, 70, 80, 90, 100],
+          how: "Keep the hi-hat light so the snare stands out. Relax the hi-hat hand.", q: "16th note hi hat groove one hand drum lesson" },
+        { id: "d-half", name: "Half-time feel", pattern: "HH  x x x x x x x x\nSN  . . . . o . . .\nBD  o . . . . . . .", unit: "8th notes", ladder: [60, 70, 80, 90, 100],
+          how: "Same tempo, but the snare lands only on 3. Makes a song feel big and heavy.", q: "half time groove drum lesson" },
+        { id: "d-four", name: "Four on the floor", pattern: "HH  closed on beats, open on &\nSN  on 2 and 4\nBD  every beat", unit: "8th notes", ladder: [90, 100, 110, 120, 128],
+          how: "The dance and disco beat. Keep every kick the same volume.", q: "four on the floor disco beat drum lesson" },
+      ] },
+    { id: "d4", title: "Fills and feel", goal: "Go in and out of short fills without losing time, and learn the shuffle.",
+      drills: [
+        { id: "d-fill1", name: "One-beat fill", pattern: "3 bars of beat, then bar 4:\nbeat · beat · beat · S S T T", unit: "16th notes", ladder: [60, 70, 80, 90, 100],
+          how: "Fill only the last beat, then crash and kick on 1. Coming back on time matters more than the fill.", q: "easy one beat drum fill beginner" },
+        { id: "d-fillbar", name: "Around the kit", pattern: "SSSS · T1T1T1T1 · T2T2T2T2 · FTFTFTFT", unit: "16th notes", ladder: [60, 70, 80, 90, 100],
+          how: "Move from high to low drums, lead with the right hand, end with crash and kick on 1.", q: "around the drums fill 16th notes beginner" },
+        { id: "d-shuf", name: "Shuffle", pattern: "HH  x . x x . x  (triplets, skip the middle)\nSN  on 2 and 4 · BD on 1 and 3", unit: "triplets", ladder: [60, 70, 80, 90, 100, 110],
+          how: "Say 'hump-ty' on every beat and skip the 'ty'. The swing feel of blues and rock'n'roll.", q: "shuffle beat drum lesson beginner" },
+      ] },
+  ],
+};
+const TIPS = [
+  { inst: null, title: "Practice that works", items: [
+    "<b>Short and daily beats long and rare.</b> 20 minutes every day teaches your hands more than 2 hours on Sunday. Your brain sorts the movement out while you sleep.",
+    "<b>Split each session.</b> 5 minutes warm-up, 10 minutes drills from the Lessons tab, 10 minutes songs, 5 minutes playing just for fun.",
+    "<b>Slow is the shortcut.</b> Find the tempo where you can play it cleanly 3 times in a row. Only then add 5 BPM. Two mistakes in a row: go back 10 BPM.",
+    "<b>Always use the metronome for drills.</b> Speed without timing is noise. The tempo steps in each lesson tell you where to start and where to aim.",
+    "<b>Record yourself once a week.</b> You will hear timing slips and buzzing you miss while playing.",
+    "<b>Play along with real songs every week.</b> Ballads sit at 60–80 BPM, pop at 90–120, rock at 110–140. Start with slower songs.",
+    "<b>Stop before pain.</b> Sore fingertips on guitar are normal at first. Pain in the wrist, elbow or shoulder is not: rest and check your posture.",
+  ] },
+  { inst: "guitar", title: "Guitar: chords", items: [
+    "<b>The five chords G, C, D, Em and Am</b> play thousands of songs. Add E, A, Dm and F and you can play most pop songs. A capo lets you use the same shapes in other keys.",
+    "<b>Buzzing?</b> Press just behind the metal fret, not on top of it or in the middle. Use your fingertips and keep your thumb behind the neck.",
+    "<b>Strings not ringing?</b> Strum one string at a time and look for the finger that touches its neighbour. Arch the fingers more.",
+    "<b>Find anchor fingers.</b> From C to Am, the index and middle fingers stay where they are. From G to Em, lift everything except the middle and ring fingers. Fewer moving fingers means faster changes.",
+    "<b>Move the whole shape at once.</b> Don't place fingers one by one. Lift them together, hover, and land them together, even if one is wrong at first.",
+    "<b>One-minute changes.</b> Pick two chords, set a 60-second timer and switch back and forth, one strum per change. Write down your best. 30 is good, 60 means the change is automatic.",
+    "<b>Barre chords:</b> roll the index finger slightly onto its bony side, keep the elbow close to your body and pull back with the arm instead of squeezing with the thumb. Practise the shape at fret 5 first, where it's easier, then move down to F.",
+  ] },
+  { inst: "guitar", title: "Guitar: strumming and picking", items: [
+    "<b>The strumming hand never stops.</b> Down on the numbers, up on the '&'. For a rest, keep moving and just miss the strings.",
+    "<b>Strum from the wrist</b>, not the elbow. Hold the pick loosely; a thin pick (0.5–0.7 mm) is easier for strumming.",
+    "<b>Up strums are lighter.</b> Hit only the top 3 or 4 strings on the way up.",
+    "<b>Alternate picking:</b> strictly down-up, even when you change string. Small movements, with the pick close to the strings.",
+    "<b>Tune every time you play.</b> New strings sound better and stay in tune; change them every 2 to 3 months.",
+  ] },
+  { inst: "drums", title: "Drums: strokes and technique", items: [
+    "<b>Let the stick bounce.</b> Throw the stick down and catch it on the way up. Don't push it into the head.",
+    "<b>Grip:</b> hold the stick between thumb and index finger about a third of the way up. Those two fingers are the pivot; the back fingers stay loose.",
+    "<b>Stick height is volume.</b> Accents from high, taps from low. When both sticks start at the same height, both hands sound the same.",
+    "<b>Count out loud:</b> '1 e & a 2 e & a'. If you can't count it, you can't play it in time.",
+    "<b>Use a practice pad</b> for rudiments: 10 minutes a day with the metronome, quietly at home. It's where most speed and control comes from.",
+    "<b>Lead with either hand.</b> Practise every rudiment starting with the left hand too. It makes fills much easier later.",
+  ] },
+  { inst: "drums", title: "Drums: beats and the kit", items: [
+    "<b>Build beats in layers.</b> Hi-hat alone, then add the snare, then the kick. Only add a layer when the last one is steady.",
+    "<b>Snare on 2 and 4 is the backbone</b> of almost every pop and rock song. Make those two hits strong and even.",
+    "<b>Feet:</b> heel-up gives power, heel-down gives control and quiet volume. Try both and use the one the song needs.",
+    "<b>Fills are short.</b> Start with one-beat fills. The most important note is beat 1 after the fill, with the crash.",
+    "<b>Set up the kit for you:</b> throne high enough that your thighs slope slightly down, snare just above your thighs, and everything reachable without leaning.",
+    "<b>Protect your hearing.</b> Wear earplugs on an acoustic kit, every time.",
+  ] },
+];
 const CURRICULUM = {
   guitar: [
     ["Tuning and posture", "Tune with a tuner app before every session. Sit or stand with the guitar balanced and the wrist relaxed."],
@@ -173,6 +357,7 @@ const CURRICULUM = {
 };
 
 let meta = null, logs = [], store = null, tab = "progress", pendingDelete = null, restoreArmed = false, restoreDraft = "", toastT;
+let lessonInst = "guitar", openLesson = "auto";
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const pad = n => String(n).padStart(2, "0");
@@ -190,12 +375,13 @@ function toast(m) { note(m); clearTimeout(toastT); toastT = setTimeout(() => not
 function defaults() {
   const skills = {};
   for (const i of INSTS) skills[i] = CURRICULUM[i].map(([name, tip], n) => ({ id: i + "-" + n, name, tip, stage: 0, updated: null }));
-  return { v: 1, skills, goals: { guitar: 90, drums: 90 } };
+  return { v: 1, skills, goals: { guitar: 90, drums: 90 }, drills: {}, chords: {}, changes: {} };
 }
 function normalize(d) {
   const base = defaults();
   return { ...base, ...d, skills: { guitar: d.skills?.guitar || base.skills.guitar, drums: d.skills?.drums || base.skills.drums },
-    goals: { ...base.goals, ...(d.goals || {}) } };
+    goals: { ...base.goals, ...(d.goals || {}) },
+    drills: { ...(d.drills || {}) }, chords: { ...(d.chords || {}) }, changes: { ...(d.changes || {}) } };
 }
 function cloudStore(db, uid) {
   const root = db.doc("data/users/" + uid + "/music"), col = root.collection("logs");
@@ -250,14 +436,56 @@ function streak(i) {
   let n = 0; while (days.has(ymd(d))) { n++; d = addDays(d, -1); }
   return n;
 }
-function dotsOf(s) { return `<span class="dots" aria-label="${STAGES[s.stage]}">${[1, 2, 3, 4, 5].map(k => `<i class="${k <= s.stage ? "on" : ""}"></i>`).join("")}</span>`; }
+function dotsOf(s, labels = STAGES) { return `<span class="dots" aria-label="${labels[s.stage]}">${[1, 2, 3, 4, 5].map(k => `<i class="${k <= s.stage ? "on" : ""}"></i>`).join("")}</span>`; }
+
+// lessons: a drill's stage comes from how many tempo steps you've played cleanly; a chord's stage is picked by you.
+const allDrills = () => INSTS.flatMap(i => LESSONS[i].flatMap(l => l.drills || []));
+const drillBest = d => (meta.drills[d.id] || {}).best || 0;
+const drillStage = d => Math.round(5 * d.ladder.filter(x => x <= drillBest(d)).length / d.ladder.length);
+const chordStage = c => (meta.chords[c] || {}).stage || 0;
+const lessonItems = l => [...(l.chords || []).map(chordStage), ...(l.drills || []).map(drillStage)];
+const avgPct = a => a.length ? Math.round(100 * a.reduce((x, y) => x + y, 0) / (5 * a.length)) : 0;
+const lessonPct = l => avgPct(lessonItems(l));
+function instLessons(i) {
+  const items = LESSONS[i].flatMap(lessonItems);
+  return { pct: avgPct(items), mastered: items.filter(x => x === 5).length, total: items.length };
+}
+
+// ---------- metronome ----------
+const metro = { on: false, bpm: 80, ctx: null, next: 0, beat: 0, timer: null };
+const clampBpm = v => Math.max(30, Math.min(260, Math.round(v) || 80));
+function metroClick(t, accent) {
+  const c = metro.ctx, o = c.createOscillator(), g = c.createGain();
+  o.frequency.value = accent ? 1600 : 1000;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(accent ? 0.7 : 0.4, t + 0.002);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+  o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 0.06);
+}
+function metroTick() {
+  while (metro.next < metro.ctx.currentTime + 0.1) { metroClick(metro.next, metro.beat % 4 === 0); metro.next += 60 / metro.bpm; metro.beat++; }
+}
+function metroStart(bpm) {
+  if (bpm) metro.bpm = clampBpm(bpm);
+  try { metro.ctx = metro.ctx || new (window.AudioContext || window.webkitAudioContext)(); if (metro.ctx.resume) metro.ctx.resume(); }
+  catch { toast("This browser can't play the click."); return; }
+  metro.on = true; metro.beat = 0; metro.next = metro.ctx.currentTime + 0.06;
+  clearInterval(metro.timer); metro.timer = setInterval(metroTick, 25);
+  syncMetro();
+}
+function metroStop() { metro.on = false; clearInterval(metro.timer); syncMetro(); }
+function syncMetro() {
+  const i = $("#metro-bpm"), b = $("#metro-toggle");
+  if (i && document.activeElement !== i) i.value = metro.bpm;
+  if (b) b.textContent = metro.on ? "Stop" : "Start";
+}
 
 // ---------- rendering ----------
 function render() {
   if (!meta) return;
   renderStats();
   $("#tabs").innerHTML = TABS.map(([k, l]) => `<button type="button" role="tab" data-act="tab" data-t="${k}" aria-selected="${tab === k}">${l}</button>`).join("");
-  const v = { progress: progressView, log: logView, skills: skillsView, backup: backupView }[tab];
+  const v = { progress: progressView, lessons: lessonsView, log: logView, skills: skillsView, tips: tipsView, backup: backupView }[tab];
   $("#view").innerHTML = v();
 }
 function renderStats() {
@@ -272,13 +500,15 @@ function renderStats() {
 }
 function instCard(i) {
   const p = pct(i), [a, b] = weekRange(0), wk = minutesOn(i, a, b), g = meta.goals[i];
-  const next = nextSkills(i), due = dueSkills(i).length, ready = skills(i).filter(s => s.stage >= 4).length;
+  const next = nextSkills(i), due = dueSkills(i).length, ready = skills(i).filter(s => s.stage >= 4).length, L = instLessons(i);
   return `<article class="card inst i-${i}">
     <div class="row between"><h2>${NAME[i]}</h2><span class="lvl">${levelOf(p)}</span></div>
     <div class="bar" role="progressbar" aria-valuenow="${p}" aria-valuemin="0" aria-valuemax="100" aria-label="${NAME[i]} progress"><i style="width:${p}%"></i></div>
     <p class="small">${p}% of the way through the list · ${ready} of ${skills(i).length} skills at target tempo</p>
     <p class="small">This week: <b>${wk} / ${g} min</b> · Practice streak: <b>${streak(i)} day${streak(i) === 1 ? "" : "s"}</b></p>
-    <div class="row"><button class="btn sm inst" type="button" data-act="quick" data-i="${i}">+15 min today</button></div>
+    <p class="small">Lessons: <b>${L.pct}%</b> · ${L.mastered} of ${L.total} ${i === "guitar" ? "chords and drills" : "strokes and grooves"} mastered</p>
+    <div class="row"><button class="btn sm inst" type="button" data-act="quick" data-i="${i}">+15 min today</button>
+      <button class="btn sm ghost" type="button" data-act="tab" data-t="lessons" data-i="${i}">Open lessons</button></div>
     <p class="kicker">Learn next</p>
     ${next.length ? `<ol>${next.map(s => `<li>${esc(s.name)}<small>${STAGES[s.stage]}</small></li>`).join("")}</ol>`
       : `<p class="small muted">Every skill is at stage 3 or above. Push them to target tempo.</p>`}
@@ -354,6 +584,107 @@ function skillsView() {
       <div class="row"><button class="btn primary" type="submit">Add skill</button></div>
     </form>`;
 }
+// ---------- lessons view ----------
+function chordSVG(name) {
+  const c = CHORDS[name], f = c.f, pos = f.filter(x => x > 0), max = Math.max(0, ...pos);
+  const start = max > 5 ? Math.min(...pos) : 1;
+  const X = s => 14 + s * 12, Y = k => 22 + k * 15;
+  let g = "";
+  for (let k = 0; k <= 5; k++) g += `<line x1="14" y1="${Y(k)}" x2="74" y2="${Y(k)}" stroke="currentColor" stroke-width="${k === 0 && start === 1 ? 3 : 1}" opacity="${k === 0 && start === 1 ? 1 : .45}"/>`;
+  for (let s = 0; s < 6; s++) g += `<line x1="${X(s)}" y1="${Y(0)}" x2="${X(s)}" y2="${Y(5)}" stroke="currentColor" opacity=".6"/>`;
+  if (start > 1) g += `<text x="78" y="${Y(0) + 11}" font-size="9" fill="currentColor">${start}fr</text>`;
+  if (c.barre) {
+    const s0 = f.findIndex(x => x === c.barre), y = Y(c.barre - start) + 7.5;
+    g += `<rect x="${X(s0) - 5}" y="${y - 5}" width="${X(5) - X(s0) + 10}" height="10" rx="5" fill="var(--i)"/>`;
+  }
+  f.forEach((fr, s) => {
+    if (fr < 0) g += `<text x="${X(s)}" y="16" font-size="11" text-anchor="middle" fill="currentColor" opacity=".7">×</text>`;
+    else if (fr === 0) g += `<circle cx="${X(s)}" cy="12" r="3.5" fill="none" stroke="currentColor" stroke-width="1.3"/>`;
+    else if (!(c.barre && fr === c.barre)) {
+      const y = Y(fr - start) + 7.5;
+      g += `<circle cx="${X(s)}" cy="${y}" r="5.5" fill="var(--i)"/>`;
+      if (c.fi[s]) g += `<text x="${X(s)}" y="${y + 3}" font-size="8" font-weight="700" text-anchor="middle" fill="var(--surface)">${c.fi[s]}</text>`;
+    }
+  });
+  const desc = f.map(x => x < 0 ? "x" : x).join(" ");
+  return `<svg viewBox="0 0 90 100" role="img" aria-label="${name} chord, strings low to high: ${desc}">${g}</svg>`;
+}
+function chordCard(name) {
+  const st = chordStage(name);
+  return `<div class="chord">${chordSVG(name)}<strong>${name}</strong>
+    <select data-act="cstage" data-c="${name}" aria-label="How well you play ${name}">${CHORD_STAGES.map((t, k) => `<option value="${k}" ${k === st ? "selected" : ""}>${k}. ${t}</option>`).join("")}</select>
+    ${dotsOf({ stage: st }, CHORD_STAGES)}
+    <a class="mini" href="${YT("how to play " + name + " chord guitar beginner")}" target="_blank" rel="noopener">Video ↗</a></div>`;
+}
+function changeRow(p) {
+  const k = p.join("-"), b = (meta.changes[k] || {}).best || 0;
+  return `<div class="chg"><b>${p[0]} ↔ ${p[1]}</b>
+    <label class="inline">Best in 1 minute<input type="number" min="0" max="200" inputmode="numeric" value="${b || ""}" placeholder="0" data-act="cbest" data-k="${k}"></label>
+    <div class="bar" aria-hidden="true"><i style="width:${Math.min(100, b / 60 * 100)}%"></i></div>
+    <span class="mini">${b >= 60 ? "Automatic" : b >= 30 ? "Good, aim for 60" : "Aim for 30"}</span></div>`;
+}
+function drillRow(d) {
+  const b = drillBest(d), st = drillStage(d), top = d.ladder[d.ladder.length - 1], next = d.ladder.find(x => x > b) || top;
+  return `<div class="drill">
+    <div class="row between"><strong>${esc(d.name)}</strong>${dotsOf({ stage: st })}</div>
+    <code class="pat">${esc(d.pattern)}</code>
+    <p class="small">${esc(d.how)}</p>
+    <div class="row" role="group" aria-label="Tempo steps for ${esc(d.name)}"><span class="mini">${esc(d.unit)}, clean at</span>
+      ${d.ladder.map(x => `<button type="button" class="chip ${x <= b ? "on" : ""}" data-act="ladder" data-id="${d.id}" data-bpm="${x}" aria-pressed="${x <= b}">${x}</button>`).join("")}<span class="mini">BPM</span></div>
+    <div class="row"><button class="btn sm inst" type="button" data-act="mplay" data-bpm="${next}">▶ Click at ${next} BPM</button>
+      <a class="small" href="${YT(d.q)}" target="_blank" rel="noopener">Find a video lesson ↗</a>
+      ${b ? `<span class="mini">Best ${b} BPM${b >= top ? " · goal reached" : " · goal " + top}</span>` : `<span class="mini">Goal ${top} BPM</span>`}</div>
+  </div>`;
+}
+function lessonBody(l) {
+  let h = "";
+  if (l.chords?.length) h += `<h3>Chords</h3><p class="small muted">Rate each chord as you go. Stage 5 means you can switch to it on every beat.</p><div class="chords">${l.chords.map(chordCard).join("")}</div>`;
+  if (l.changes?.length) h += `<h3>One-minute changes</h3><p class="small muted">Set a 60-second timer and switch between the two chords as many times as you can, one strum per change. Count only clean changes and enter your best.</p><div class="list">${l.changes.map(changeRow).join("")}</div>`;
+  if (l.drills?.length) h += `<h3>${lessonInst === "drums" ? "Strokes and grooves" : "Drills"}</h3><p class="small muted">Start the click at the first tempo. When you play it cleanly 3 times in a row, tap that tempo and move up one step.</p><div class="list">${l.drills.map(drillRow).join("")}</div>`;
+  return h;
+}
+function lessonCard(l, n) {
+  const p = lessonPct(l), open = openLesson === l.id;
+  return `<section class="card lesson i-${lessonInst}">
+    <button class="lhead" type="button" data-act="lopen" data-id="${l.id}" aria-expanded="${open}">
+      <span class="lnum">${pad(n)}</span><span class="ltitle"><strong>${esc(l.title)}</strong><span class="small muted">${esc(l.goal)}</span></span><span class="lpct">${p}%</span></button>
+    <div class="bar"><i style="width:${p}%"></i></div>
+    ${open ? lessonBody(l) : ""}
+  </section>`;
+}
+function metroBar() {
+  return `<div class="card metro i-${lessonInst}"><div class="row between"><h3>Metronome</h3><span class="mini">4/4, accent on beat 1</span></div>
+    <div class="row"><button class="btn sm" type="button" data-act="mbpm" data-d="-5" aria-label="5 BPM slower">−5</button>
+      <input type="number" id="metro-bpm" class="bpm" min="30" max="260" value="${metro.bpm}" data-act="mset" aria-label="Tempo in BPM"><span class="mini">BPM</span>
+      <button class="btn sm" type="button" data-act="mbpm" data-d="5" aria-label="5 BPM faster">+5</button>
+      <button class="btn primary" type="button" id="metro-toggle" data-act="mtoggle">${metro.on ? "Stop" : "Start"}</button></div></div>`;
+}
+function lessonsView() {
+  const ls = LESSONS[lessonInst];
+  if (openLesson === "auto") openLesson = (ls.find(l => lessonPct(l) < 100) || ls[0]).id;
+  return metroBar() +
+    `<div class="row" role="group" aria-label="Instrument">${INSTS.map(i => `<button type="button" class="btn ${i === lessonInst ? "primary" : ""}" data-act="linst" data-i="${i}" aria-pressed="${i === lessonInst}">${NAME[i]}</button>`).join("")}</div>` +
+    ls.map((l, n) => lessonCard(l, n + 1)).join("");
+}
+
+// ---------- tips view ----------
+function tipsView() {
+  const links = [
+    ["JustinGuitar: free beginner guitar course", "https://www.justinguitar.com/"],
+    ["Beginner guitar lessons on YouTube", YT("JustinGuitar beginner guitar course lesson 1")],
+    ["One-minute changes explained", YT("one minute changes guitar justin")],
+    ["Beginner drum lessons on YouTube", YT("drumeo first drum lesson beginner")],
+    ["The 40 essential drum rudiments", YT("40 essential drum rudiments")],
+    ["Backing tracks to jam over", YT("A minor backing track slow")],
+  ];
+  return TIPS.map(t => `<section class="card tips ${t.inst ? "i-" + t.inst : ""}"><h3>${esc(t.title)}</h3><ul>${t.items.map(x => `<li>${x}</li>`).join("")}</ul></section>`).join("") +
+    `<section class="card tips"><h3>Tempo guide</h3>
+      <div class="tempos">${[["Slow ballad", "60–80"], ["Pop", "90–120"], ["Rock", "110–140"], ["Dance", "120–128"], ["Punk", "160+"]].map(([a, b]) => `<div><b>${b}</b><span>${a}</span></div>`).join("")}</div>
+      <p class="small muted">BPM = beats per minute. Most beginner goals in the lessons stop around 100–120, the speed of a typical pop or rock song.</p></section>` +
+    `<section class="card tips"><h3>Where to learn more</h3><ul>${links.map(([t, u]) => `<li><a href="${u}" target="_blank" rel="noopener">${esc(t)} ↗</a></li>`).join("")}</ul>
+      <p class="small muted">Video links open a YouTube search, so you can pick a teacher you like.</p></section>`;
+}
+
 function backupText() {
   return JSON.stringify({ app: "music-progress", v: 1, exported: new Date().toISOString(), meta, logs }, null, 1);
 }
@@ -386,7 +717,23 @@ document.addEventListener("click", async e => {
   const el = e.target.closest("[data-act]");
   if (!el || el.tagName === "INPUT" || el.tagName === "SELECT") return;
   const act = el.dataset.act;
-  if (act === "tab") { tab = el.dataset.t; pendingDelete = null; restoreArmed = false; render(); return; }
+  if (act === "tab") {
+    tab = el.dataset.t; pendingDelete = null; restoreArmed = false;
+    if (el.dataset.i) { lessonInst = el.dataset.i; openLesson = "auto"; }
+    if (tab !== "lessons" && metro.on) metroStop();
+    render(); window.scrollTo({ top: 0 }); return;
+  }
+  if (act === "linst") { lessonInst = el.dataset.i; openLesson = "auto"; render(); return; }
+  if (act === "lopen") { openLesson = openLesson === el.dataset.id ? null : el.dataset.id; render(); return; }
+  if (act === "ladder") {
+    const d = allDrills().find(x => x.id === el.dataset.id), bpm = +el.dataset.bpm; if (!d) return;
+    const best = drillBest(d) >= bpm ? (d.ladder.filter(x => x < bpm).pop() || 0) : bpm;
+    meta.drills = { ...meta.drills, [d.id]: { best, updated: Date.now() } };
+    save(); return;
+  }
+  if (act === "mtoggle") { if (metro.on) metroStop(); else metroStart(); return; }
+  if (act === "mbpm") { metro.bpm = clampBpm(metro.bpm + +el.dataset.d); syncMetro(); return; }
+  if (act === "mplay") { metroStart(+el.dataset.bpm); window.scrollTo({ top: $("#metro-bpm").getBoundingClientRect().top + window.scrollY - 80, behavior: "smooth" }); return; }
   if (act === "quick") {
     await store.addLog({ id: uid(), inst: el.dataset.i, min: 15, date: ymd(today()), skill: "", note: "" });
     toast("Added 15 minutes of " + NAME[el.dataset.i].toLowerCase() + ".");
@@ -430,6 +777,14 @@ document.addEventListener("change", e => {
     const s = allSkills().find(x => x.id === el.dataset.id); if (!s) return;
     s.stage = +el.value; s.updated = s.stage ? Date.now() : null; save(); return;
   }
+  if (el.dataset.act === "cstage") {
+    meta.chords = { ...meta.chords, [el.dataset.c]: { stage: +el.value, updated: Date.now() } }; save(); return;
+  }
+  if (el.dataset.act === "cbest") {
+    const v = Math.max(0, Math.min(200, Math.round(+el.value) || 0));
+    meta.changes = { ...meta.changes, [el.dataset.k]: { best: v, updated: Date.now() } }; save(); return;
+  }
+  if (el.dataset.act === "mset") { metro.bpm = clampBpm(+el.value); syncMetro(); return; }
   if (el.dataset.act === "goal") {
     const v = Math.max(0, Math.min(1000, Math.round(+el.value) || 0));
     meta.goals[el.dataset.i] = v; save();
