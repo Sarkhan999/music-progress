@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guitar & Drums</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #F2F3F0; --surface: #FFFFFF; --ink: #15171C; --muted: #5B606C; --line: #D8DBD4;
+  --accent: #E3A900; --focus: #2457C5; --good: #157A47; --bad: #C2323A; --warn: #A86400;
+  --guitar: #D2551E; --drums: #2457C5;
+  --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121418; --surface: #1B1E24; --ink: #ECEDEF; --muted: #9CA2AE; --line: #2D313A;
+  --accent: #F2B705; --focus: #8FB0F7; --good: #6CCF98; --bad: #F28A8F; --warn: #E8B04B;
+  --guitar: #F08A5A; --drums: #86A9F6; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #121418; --surface: #1B1E24; --ink: #ECEDEF; --muted: #9CA2AE; --line: #2D313A;
+  --accent: #F2B705; --focus: #8FB0F7; --good: #6CCF98; --bad: #F28A8F; --warn: #E8B04B;
+  --guitar: #F08A5A; --drums: #86A9F6; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 20px max(16px, env(safe-area-inset-right, 0px)) 56px max(16px, env(safe-area-inset-left, 0px));
+  display: flex; flex-direction: column; gap: 18px; }
+h1, h2, h3 { font-family: var(--display); margin: 0; line-height: 1.1; }
+h1 { font-size: 2.3rem; font-weight: 700; }
+h2 { font-size: 1.6rem; font-weight: 700; }
+h3 { font-size: 1.3rem; font-weight: 700; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.small { font-size: .9rem; }
+.kicker { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.between { justify-content: space-between; }
+.i-guitar { --i: var(--guitar); }
+.i-drums { --i: var(--drums); }
+[hidden] { display: none !important; }
+a { color: var(--focus); }
+header { display: flex; flex-direction: column; gap: 12px; }
+.back { font-size: .9rem; color: var(--muted); }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+.stat b { display: block; font-family: var(--display); font-size: 1.7rem; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat span { font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+@media (max-width: 520px) { .stats { grid-template-columns: 1fr; } }
+.note { background: var(--surface); border: 1px dashed var(--line); padding: 10px 14px; border-radius: 10px; color: var(--muted); font-size: .92rem; }
+
+nav.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+nav.tabs button { background: none; border: 0; border-bottom: 3px solid transparent; padding: 8px 12px 7px; cursor: pointer;
+  font: 600 1.05rem var(--display); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+nav.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+
+.btn { font: 600 .98rem var(--body); padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); cursor: pointer; }
+.btn:hover:not(:disabled) { border-color: var(--muted); }
+.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.btn.ghost { background: transparent; }
+.btn.sm { font-size: .88rem; padding: 5px 10px; }
+.btn.warn { color: var(--bad); border-color: var(--bad); }
+.btn.danger { background: var(--bad); color: var(--surface); border-color: var(--bad); }
+.btn.inst { color: var(--i); border-color: var(--i); }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+input, select, textarea { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; min-width: 0; }
+textarea { min-height: 90px; resize: vertical; }
+label { display: flex; flex-direction: column; gap: 3px; font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+label.full { grid-column: 1 / -1; }
+.form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 520px) { .form { grid-template-columns: 1fr; } }
+.status { font-size: .9rem; color: var(--good); min-height: 1.4em; }
+
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 680px) { .cards { grid-template-columns: 1fr; } }
+.card { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--i, var(--line)); border-radius: 14px;
+  padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.inst h2 { color: var(--i); }
+.lvl { font: 600 .8rem var(--body); padding: 2px 10px; border-radius: 999px; background: var(--bg); color: var(--i); border: 1px solid var(--i); white-space: nowrap; }
+.bar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--i); }
+.inst ol { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 3px; }
+.inst ol small { color: var(--muted); margin-left: 6px; }
+.due { color: var(--warn); font-weight: 600; }
+
+.chart { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; align-items: end; height: 160px; border-bottom: 1px solid var(--line); }
+.wk { display: flex; flex-direction: column; justify-content: flex-end; height: 100%; gap: 4px; min-width: 0; }
+.wk .bars { display: flex; gap: 2px; align-items: flex-end; height: 100%; }
+.wk .bars i { flex: 1; min-height: 0; border-radius: 3px 3px 0 0; background: var(--i); display: block; }
+.wk .bars i.g { --i: var(--guitar); }
+.wk .bars i.d { --i: var(--drums); }
+.wk span { font-size: .72rem; color: var(--muted); text-align: center; white-space: nowrap; overflow: hidden; }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--i); margin: 0 4px 0 10px; vertical-align: middle; }
+.sw.i-guitar { --i: var(--guitar); } .sw.i-drums { --i: var(--drums); }
+
+.list { display: flex; flex-direction: column; gap: 8px; }
+.logrow { display: grid; grid-template-columns: 4.6em minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 12px;
+  background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--i); border-radius: 10px; }
+.logrow time { color: var(--muted); font-size: .88rem; }
+.logrow small { display: block; color: var(--muted); }
+.skillgroup { display: flex; flex-direction: column; gap: 8px; }
+.skill { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--i); border-radius: 10px; padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 6px; }
+.skill select { width: auto; }
+.skill details summary { cursor: pointer; color: var(--muted); font-size: .9rem; }
+.skill details p { margin-top: 6px; }
+.skill .stag { font-size: .85rem; color: var(--muted); }
+.skill .stag.due { color: var(--warn); }
+.dots { display: flex; gap: 3px; }
+.dots i { width: 9px; height: 9px; border-radius: 2px; background: var(--line); }
+.dots i.on { background: var(--i); }
+.mini { font-size: .85rem; color: var(--muted); }
+.backup textarea { font-family: ui-monospace, Consolas, monospace; font-size: .85rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="https://claude.ai/artifact/N85KsQxGujNLSwSM2wHXDF" target="_blank" rel="noopener">&larr; Life OS</a>
+    <h1>Guitar &amp; Drums</h1>
+    <p class="muted">Your progress on each instrument: what you can play, what to learn next, and how much you practise.</p>
+    <div class="stats" id="stats"></div>
+  </header>
+  <p class="note" id="note" hidden></p>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+  <main id="view"><p class="note">Loading your progress…</p></main>
+</div>
+
+<script>
+const DAY = 864e5;
+const INSTS = ["guitar", "drums"];
+const NAME = { guitar: "Guitar", drums: "Drums" };
+const STAGES = ["Not started", "Learning", "Slow and clean", "Steady", "Target tempo", "Mastered"];
+const DUE_DAYS = [0, 1, 3, 7, 14, 30]; // days before a skill at this stage is due for review
+const TABS = [["progress", "Progress"], ["log", "Log"], ["skills", "Skills"], ["backup", "Backup"]];
+const CURRICULUM = {
+  guitar: [
+    ["Tuning and posture", "Tune with a tuner app before every session. Sit or stand with the guitar balanced and the wrist relaxed."],
+    ["Open chords G, C, D, Em", "Press close to the fret, one finger per string. Check every string rings. Change slowly."],
+    ["Open chords Am, E, A, Dm", "Keep fingers arched and close to the frets. Lift only the fingers you need."],
+    ["Chord changes at tempo", "Change between C, G, Am and F on every 4 beats at 60 BPM. Speed up only when it's clean."],
+    ["Down-up strumming", "Steady 8th-note down-up pattern from the wrist. Keep the strumming loose."],
+    ["Palm muting", "Rest the picking hand's edge on the strings near the bridge for a short, tight sound."],
+    ["Barre chord F", "Index finger across all strings just behind the fret. Use the side of the finger if it hurts."],
+    ["Barre chord Bm (E shape)", "The E shape moved up the neck. Same shape, any fret: a strong base for rock songs."],
+    ["Power chords", "Two or three strings with index and ring finger. Easy to move, great for rock."],
+    ["Fingerpicking basics", "Thumb on the bass strings, fingers on the top three. Start with one slow pattern."],
+    ["Alternate picking", "Down-up on one string with a metronome at 80 BPM, then on two strings."],
+    ["Minor pentatonic scale (box 1)", "Learn the shape, say the note names, then play it over a backing track."],
+    ["Play a song with chords", "Pick one song you like with 3 or 4 chords and play along with the recording."],
+    ["Read chord charts and tabs", "Know chord symbols and what each line of tab means. Play from a sheet."]
+  ],
+  drums: [
+    ["Grip and posture", "Matched or traditional grip, relaxed shoulders. Set the throne so your thighs slope slightly down."],
+    ["Basic 8th-note hi-hat", "Right hand steady 8ths with the stick low and loose. Count out loud: 1 & 2 & 3 & 4 &."],
+    ["Kick and snare basic rock beat", "Snare on 2 and 4, kick on 1 and 3. Learn hands and feet separately first."],
+    ["Four-on-the-floor and half-time", "Kick on every beat for dance tracks. Snare only on 3 for a half-time feel."],
+    ["Open and closed hi-hat", "Open the hi-hat on the off-beats for a lift. Keep the foot pedal steady."],
+    ["Ride cymbal pattern", "Quarter-note ride with the bell for accents. Keeps the beat clear on a loud song."],
+    ["One-bar fills", "Simple 4-note fill at the end of a bar, then back to the beat. Keep it short at first."],
+    ["Single and double strokes", "Let the stick bounce back. Even sound on both hands at slow and fast speeds."],
+    ["Paradiddle", "Right-left-right-right, left-right-left-left. Practise slowly with a metronome."],
+    ["Hands and feet independence", "Keep one limb on a steady beat while the other changes. Start with quarter notes."],
+    ["Reading simple notation", "Quarter notes, eighth notes and rests. Count the bar before you play it."],
+    ["Tempo control 60 to 100 BPM", "Practise the beat slowly and step up 5 BPM at a time with a metronome."],
+    ["Dynamics: soft and loud", "Play the same beat quietly and then loudly. Control the stick height, not the force."],
+    ["Play along to a song", "Pick a rock song you know. Play the beat along with the recording."]
+  ]
+};
+
+let meta = null, logs = [], store = null, tab = "progress", pendingDelete = null, restoreArmed = false, restoreDraft = "", toastT;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pad = n => String(n).padStart(2, "0");
+const ymd = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+const parse = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const monday = d => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
+const today = () => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); };
+const fmtDate = s => parse(s).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+const uid = () => "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const note = m => { const n = $("#note"); n.textContent = m || ""; n.hidden = !m; };
+function toast(m) { note(m); clearTimeout(toastT); toastT = setTimeout(() => note(""), 4000); }
+
+// ---------- data ----------
+function defaults() {
+  const skills = {};
+  for (const i of INSTS) skills[i] = CURRICULUM[i].map(([name, tip], n) => ({ id: i + "-" + n, name, tip, stage: 0, updated: null }));
+  return { v: 1, skills, goals: { guitar: 90, drums: 90 } };
+}
+function normalize(d) {
+  const base = defaults();
+  return { ...base, ...d, skills: { guitar: d.skills?.guitar || base.skills.guitar, drums: d.skills?.drums || base.skills.drums },
+    goals: { ...base.goals, ...(d.goals || {}) } };
+}
+function cloudStore(db, uid) {
+  const root = db.doc("data/users/" + uid + "/music"), col = root.collection("logs");
+  store = {
+    saveMeta: m => root.set(m),
+    addLog: l => col.doc(l.id).set(l),
+    delLog: id => col.doc(id).delete(),
+  };
+  root.onSnapshot(s => {
+    if (s.exists) meta = normalize(s.data()); else { meta = defaults(); root.set(meta); }
+    render();
+  }, () => toast("Couldn't load your progress. Reload the page to try again."));
+  col.onSnapshot(snap => { logs = snap.docs.map(d => ({ id: d.id, ...d.data() })); render(); }, () => {});
+}
+function localStore() {
+  let d = {};
+  try { d = JSON.parse(localStorage.getItem("mp.data") || "{}") || {}; } catch {}
+  meta = normalize(d.meta || {});
+  logs = Array.isArray(d.logs) ? d.logs : [];
+  const save = () => { try { localStorage.setItem("mp.data", JSON.stringify({ meta, logs })); } catch {} };
+  store = {
+    saveMeta: async m => { meta = m; save(); },
+    addLog: async l => { logs = logs.filter(x => x.id !== l.id).concat(l); save(); },
+    delLog: async id => { logs = logs.filter(x => x.id !== id); save(); },
+  };
+  note("Saved in this browser only. Open this page on claude.ai while signed in to keep it on every device.");
+  render();
+}
+async function init() {
+  let db = null, user = null, uid = null;
+  if (window.claude) {
+    try { [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]); uid = user ? await user.id() : null; } catch {}
+  }
+  if (db && uid) cloudStore(db, uid); else localStore();
+}
+const save = () => { if (store) store.saveMeta(meta); render(); };
+
+// ---------- calculations ----------
+const skills = i => meta.skills[i] || [];
+const allSkills = () => INSTS.flatMap(skills);
+const skillName = id => (allSkills().find(s => s.id === id) || {}).name || "";
+const pct = i => { const s = skills(i); return s.length ? Math.round(100 * s.reduce((a, x) => a + x.stage, 0) / (5 * s.length)) : 0; };
+const levelOf = p => p < 20 ? "Beginner" : p < 45 ? "Getting going" : p < 70 ? "Comfortable" : "Advanced";
+const minutesOn = (i, from, to) => logs.filter(l => l.inst === i && l.date >= from && l.date <= to).reduce((a, l) => a + (+l.min || 0), 0);
+const weekRange = off => { const s = addDays(monday(today()), 7 * off); return [ymd(s), ymd(addDays(s, 6))]; };
+const isDue = s => s.stage >= 1 && s.updated && Date.now() - s.updated >= DUE_DAYS[s.stage] * DAY;
+const dueSkills = i => skills(i).filter(isDue);
+const nextSkills = i => skills(i).filter(s => s.stage < 3).slice(0, 3);
+function streak(i) {
+  const days = new Set(logs.filter(l => l.inst === i && +l.min > 0).map(l => l.date));
+  let d = today(); if (!days.has(ymd(d))) d = addDays(d, -1);
+  let n = 0; while (days.has(ymd(d))) { n++; d = addDays(d, -1); }
+  return n;
+}
+function dotsOf(s) { return `<span class="dots" aria-label="${STAGES[s.stage]}">${[1, 2, 3, 4, 5].map(k => `<i class="${k <= s.stage ? "on" : ""}"></i>`).join("")}</span>`; }
+
+// ---------- rendering ----------
+function render() {
+  if (!meta) return;
+  renderStats();
+  $("#tabs").innerHTML = TABS.map(([k, l]) => `<button type="button" role="tab" data-act="tab" data-t="${k}" aria-selected="${tab === k}">${l}</button>`).join("");
+  const v = { progress: progressView, log: logView, skills: skillsView, backup: backupView }[tab];
+  $("#view").innerHTML = v();
+}
+function renderStats() {
+  const [a, b] = weekRange(0);
+  const wk = INSTS.reduce((n, i) => n + minutesOn(i, a, b), 0);
+  const fromDay = ymd(addDays(today(), -13));
+  const days = new Set(logs.filter(l => l.date >= fromDay && +l.min > 0).map(l => l.date)).size;
+  const atTarget = allSkills().filter(s => s.stage >= 4).length;
+  $("#stats").innerHTML = `<div class="stat"><b>${wk} min</b><span>Practised this week</span></div>` +
+    `<div class="stat"><b>${days} / 14</b><span>Days practised (14 days)</span></div>` +
+    `<div class="stat"><b>${atTarget}</b><span>Skills at target tempo or better</span></div>`;
+}
+function instCard(i) {
+  const p = pct(i), [a, b] = weekRange(0), wk = minutesOn(i, a, b), g = meta.goals[i];
+  const next = nextSkills(i), due = dueSkills(i).length, ready = skills(i).filter(s => s.stage >= 4).length;
+  return `<article class="card inst i-${i}">
+    <div class="row between"><h2>${NAME[i]}</h2><span class="lvl">${levelOf(p)}</span></div>
+    <div class="bar" role="progressbar" aria-valuenow="${p}" aria-valuemin="0" aria-valuemax="100" aria-label="${NAME[i]} progress"><i style="width:${p}%"></i></div>
+    <p class="small">${p}% of the way through the list · ${ready} of ${skills(i).length} skills at target tempo</p>
+    <p class="small">This week: <b>${wk} / ${g} min</b> · Practice streak: <b>${streak(i)} day${streak(i) === 1 ? "" : "s"}</b></p>
+    <div class="row"><button class="btn sm inst" type="button" data-act="quick" data-i="${i}">+15 min today</button></div>
+    <p class="kicker">Learn next</p>
+    ${next.length ? `<ol>${next.map(s => `<li>${esc(s.name)}<small>${STAGES[s.stage]}</small></li>`).join("")}</ol>`
+      : `<p class="small muted">Every skill is at stage 3 or above. Push them to target tempo.</p>`}
+    ${due ? `<p class="small due">${due} skill${due === 1 ? "" : "s"} due for review</p>` : ""}
+  </article>`;
+}
+function chart() {
+  const weeks = [...Array(8)].map((_, k) => { const [a, b] = weekRange(k - 7); return { label: fmtDate(a), g: minutesOn("guitar", a, b), d: minutesOn("drums", a, b) }; });
+  const max = Math.max(60, ...weeks.flatMap(w => [w.g, w.d]));
+  const h = m => (m / max * 100).toFixed(1) + "%";
+  return `<div class="chart" role="img" aria-label="Minutes per week, last 8 weeks">${weeks.map(w => `<div class="wk">
+      <div class="bars"><i class="g" style="height:${h(w.g)}" title="Guitar ${w.g} min"></i><i class="d" style="height:${h(w.d)}" title="Drums ${w.d} min"></i></div>
+      <span>${w.label}</span></div>`).join("")}</div>
+    <p class="small muted"><span class="sw i-guitar"></span>Guitar<span class="sw i-drums"></span>Drums · minutes per week</p>`;
+}
+function progressView() {
+  const dueAll = INSTS.flatMap(i => dueSkills(i).map(s => ({ ...s, inst: i })));
+  return `<div class="cards">${INSTS.map(instCard).join("")}</div>
+    <section class="card"><h3>Minutes per week</h3>${chart()}</section>
+    <section class="card"><h3>Due for review</h3>${dueAll.length
+      ? `<p class="small muted">A skill comes back for review when it has not been practised for a while, based on its stage.</p>
+         <div class="list">${dueAll.map(s => `<div class="logrow i-${s.inst}"><span>${NAME[s.inst]}</span><span>${esc(s.name)}<small>${STAGES[s.stage]}</small></span><button class="btn sm" type="button" data-act="tab" data-t="skills">Open</button></div>`).join("")}</div>`
+      : `<p class="muted">Nothing due. Keep practising.</p>`}</section>
+    <section class="card"><h3>Weekly goals</h3><div class="form">
+      ${INSTS.map(i => `<label>${NAME[i]} minutes per week<input type="number" min="0" max="1000" step="5" value="${meta.goals[i]}" data-act="goal" data-i="${i}"></label>`).join("")}
+    </div></section>`;
+}
+function skillOptions() {
+  return `<option value="">No specific skill</option>` + INSTS.map(i => `<optgroup label="${NAME[i]}">${skills(i).map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("")}</optgroup>`).join("");
+}
+function logView() {
+  const recent = [...logs].sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0).slice(0, 30);
+  return `<form class="card" id="logform" data-act="savelog">
+      <h3>Log a practice session</h3>
+      <div class="form">
+        <label>Instrument<select name="inst">${INSTS.map(i => `<option value="${i}">${NAME[i]}</option>`).join("")}</select></label>
+        <label>Minutes<input type="number" name="min" min="1" max="600" value="30" required></label>
+        <label>Date<input type="date" name="date" value="${ymd(today())}" required></label>
+        <label>Worked on<select name="skill">${skillOptions()}</select></label>
+        <label class="full">Note (optional)<input type="text" name="note" maxlength="140" placeholder="e.g. chord change C to G felt smooth"></label>
+      </div>
+      <div class="row"><button class="btn primary" type="submit">Save session</button><span class="status" id="logstatus"></span></div>
+    </form>
+    <h3>Recent sessions</h3>
+    <div class="list">${recent.length ? recent.map(logRow).join("") : `<p class="muted">No sessions yet. Log your first one above.</p>`}</div>`;
+}
+function logRow(l) {
+  const del = pendingDelete === l.id;
+  return `<div class="logrow i-${l.inst}"><time>${fmtDate(l.date)}</time>
+    <span><b style="color:var(--i)">${NAME[l.inst]}</b> · ${l.min} min${l.skill ? " · " + esc(skillName(l.skill)) : ""}${l.note ? `<small>${esc(l.note)}</small>` : ""}</span>
+    <button class="btn sm ${del ? "danger" : "warn"}" type="button" data-act="dellog" data-id="${esc(l.id)}">${del ? "Tap again to delete" : "Delete"}</button></div>`;
+}
+function skillRow(s) {
+  const due = isDue(s);
+  const touched = s.updated ? "Last changed " + fmtDate(ymd(new Date(s.updated))) : "Not started";
+  return `<div class="skill">
+    <div class="row between"><strong>${esc(s.name)}</strong>
+      <select data-act="stage" data-id="${esc(s.id)}" aria-label="Stage for ${esc(s.name)}">${STAGES.map((t, k) => `<option value="${k}" ${k === s.stage ? "selected" : ""}>${k}. ${t}</option>`).join("")}</select></div>
+    <div class="row between"><span class="stag ${due ? "due" : ""}">${touched}${due ? " · due for review" : ""}</span>${dotsOf(s)}</div>
+    <details><summary>What to focus on</summary><p class="small">${esc(s.tip || "Add a note about this skill.")}</p></details>
+    ${s.custom ? `<div><button class="btn sm warn" type="button" data-act="delskill" data-id="${esc(s.id)}">${pendingDelete === s.id ? "Tap again to delete" : "Delete"}</button></div>` : ""}
+  </div>`;
+}
+function skillsView() {
+  return INSTS.map(i => `<section class="skillgroup i-${i}"><h2>${NAME[i]}</h2>
+      ${skills(i).map(skillRow).join("")}</section>`).join("") +
+    `<form class="card" id="addskill" data-act="addskill">
+      <h3>Add your own skill</h3>
+      <div class="form">
+        <label>Instrument<select name="inst">${INSTS.map(i => `<option value="${i}">${NAME[i]}</option>`).join("")}</select></label>
+        <label>Skill<input type="text" name="name" maxlength="60" placeholder="e.g. Hammer-ons" required></label>
+      </div>
+      <div class="row"><button class="btn primary" type="submit">Add skill</button></div>
+    </form>`;
+}
+function backupText() {
+  return JSON.stringify({ app: "music-progress", v: 1, exported: new Date().toISOString(), meta, logs }, null, 1);
+}
+function backupView() {
+  return `<section class="card backup">
+      <h3>Back up your progress</h3>
+      <p class="small muted">Your progress saves to your account automatically. To keep a copy, copy the text below and store it somewhere safe.</p>
+      <div class="row"><button class="btn" type="button" data-act="copy">Copy backup</button><span class="status" id="backupstatus"></span></div>
+      <textarea id="backuptext" readonly aria-label="Backup text">${esc(backupText())}</textarea>
+    </section>
+    <section class="card backup">
+      <h3>Restore from a backup</h3>
+      <p class="small muted">Paste backup text here. Its skills and goals replace yours, and its sessions are added. Sessions you already have stay.</p>
+      <textarea id="restoretext" placeholder="Paste backup text here" aria-label="Backup text to restore">${esc(restoreDraft)}</textarea>
+      <div class="row"><button class="btn warn" type="button" data-act="restore">${restoreArmed ? "Tap again to restore" : "Restore from backup"}</button><span class="status" id="restorestatus"></span></div>
+    </section>`;
+}
+
+// ---------- events ----------
+async function restoreFrom(text) {
+  let b;
+  try { b = JSON.parse(text); } catch { return "That text isn't a valid backup."; }
+  if (!b || b.app !== "music-progress" || !b.meta) return "That text isn't a Guitar & Drums backup.";
+  meta = normalize(b.meta);
+  await store.saveMeta(meta);
+  for (const l of b.logs || []) await store.addLog(l);
+  return "Backup restored.";
+}
+document.addEventListener("click", async e => {
+  const el = e.target.closest("[data-act]");
+  if (!el || el.tagName === "INPUT" || el.tagName === "SELECT") return;
+  const act = el.dataset.act;
+  if (act === "tab") { tab = el.dataset.t; pendingDelete = null; restoreArmed = false; render(); return; }
+  if (act === "quick") {
+    await store.addLog({ id: uid(), inst: el.dataset.i, min: 15, date: ymd(today()), skill: "", note: "" });
+    toast("Added 15 minutes of " + NAME[el.dataset.i].toLowerCase() + ".");
+    render(); return;
+  }
+  if (act === "dellog") {
+    const id = el.dataset.id;
+    if (pendingDelete !== id) { pendingDelete = id; render(); return; }
+    pendingDelete = null; await store.delLog(id); render(); return;
+  }
+  if (act === "delskill") {
+    const id = el.dataset.id;
+    if (pendingDelete !== id) { pendingDelete = id; render(); return; }
+    pendingDelete = null;
+    for (const i of INSTS) meta.skills[i] = meta.skills[i].filter(s => s.id !== id);
+    save(); return;
+  }
+  if (act === "copy") {
+    const t = $("#backuptext");
+    try { await navigator.clipboard.writeText(t.value); $("#backupstatus").textContent = "Copied."; }
+    catch { t.select(); $("#backupstatus").textContent = "Copy was blocked. Press Ctrl+C with the text selected."; }
+    return;
+  }
+  if (act === "restore") {
+    const txt = restoreDraft.trim();
+    if (!txt) { $("#restorestatus").textContent = "Paste a backup first."; return; }
+    if (!restoreArmed) { restoreArmed = true; el.textContent = "Tap again to restore"; return; }
+    restoreArmed = false;
+    const msg = await restoreFrom(txt);
+    restoreDraft = "";
+    render(); $("#restorestatus").textContent = msg;
+    return;
+  }
+});
+document.addEventListener("input", e => {
+  if (e.target.id === "restoretext") { restoreDraft = e.target.value; restoreArmed = false; }
+});
+document.addEventListener("change", e => {
+  const el = e.target;
+  if (el.dataset.act === "stage") {
+    const s = allSkills().find(x => x.id === el.dataset.id); if (!s) return;
+    s.stage = +el.value; s.updated = s.stage ? Date.now() : null; save(); return;
+  }
+  if (el.dataset.act === "goal") {
+    const v = Math.max(0, Math.min(1000, Math.round(+el.value) || 0));
+    meta.goals[el.dataset.i] = v; save();
+  }
+});
+document.addEventListener("submit", async e => {
+  const form = e.target;
+  e.preventDefault();
+  if (form.dataset.act === "savelog") {
+    const f = new FormData(form), min = Math.round(+f.get("min"));
+    if (!(min > 0)) { $("#logstatus").textContent = "Enter the minutes you practised."; return; }
+    await store.addLog({ id: uid(), inst: f.get("inst"), min, date: f.get("date") || ymd(today()), skill: f.get("skill") || "", note: (f.get("note") || "").trim() });
+    render(); $("#logstatus").textContent = "Saved.";
+    return;
+  }
+  if (form.dataset.act === "addskill") {
+    const f = new FormData(form), name = (f.get("name") || "").trim(), inst = f.get("inst");
+    if (!name) return;
+    meta.skills[inst] = [...skills(inst), { id: uid(), name, tip: "", stage: 0, updated: null, custom: true }];
+    save(); return;
+  }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && pendingDelete) { pendingDelete = null; render(); } });
+
+init();
+</script>
+</body>
+</html>
